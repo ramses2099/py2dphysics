@@ -25,3 +25,4 @@ YELLOW = (255, 255, 0)
 FPS = 60
 STEP = 1 / FPS
 GRAVYTY = (0.0, 900.0)
+DEBUG = True
