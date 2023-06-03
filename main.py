@@ -60,6 +60,35 @@ def draw_lines(screen, lines):
         pg.draw.line(screen, GREEN, False, [p1, p2])
 
 
+# ! Joints
+def add_L(space):
+    rotation_center_body = pmu.Body(body_type=pmu.Body.STATIC)
+    rotation_center_body.position = (300, 300)
+
+    rotation_limit_body = pmu.Body(body_type=pmu.Body.STATIC)
+    rotation_limit_body.position = (200, 300)
+
+    body = pmu.Body()
+    body.position = (300, 300)
+    l1 = pmu.Segment(body, (-150, 0), (255, 0), 5)
+    l2 = pmu.Segment(body, (-150, 0), (-150, -50), 5)
+    l1.friction = 1
+    l2.friction = 2
+    l1.mass = 8
+    l2.mass = 1
+
+    # add joint
+    rotation_center_joint = pmu.PinJoint(body, rotation_center_body, (0, 0), (0, 0))
+    joint_limit = 25
+
+    rotation_limit_joint = pmu.SlideJoint(
+        body, rotation_limit_body, (-100, 0), (0, 0), 0, joint_limit
+    )
+
+    space.add(l1, l2, body, rotation_center_joint, rotation_limit_joint)
+    return l1, l2
+
+
 # ? main function
 def main():
     pg.init()
@@ -73,12 +102,14 @@ def main():
     space = pmu.Space()
     space.gravity = GRAVYTY
 
-    lines = add_static_L(space)
+    # lines = add_static_L(space)
+    lines = add_L(space)
 
     # ? debug option in pymunk
     if DEBUG:
         draw_option = pmuutil.DrawOptions(screen)
     balls = []
+    balls_to_remove = []
 
     # ball = add_ball(space)
 
@@ -101,6 +132,15 @@ def main():
 
         # draw
         # draw_ball(screen, ball)
+
+        for ball in balls:
+            if ball.body.position.y > 650:
+                balls_to_remove.append(ball)
+
+        if len(space.shapes) > 0:
+            for shape in space.shapes:
+                if shape.body.position.y > 650:
+                    space.remove(shape, shape.body)
 
         space.step(STEP)
 
