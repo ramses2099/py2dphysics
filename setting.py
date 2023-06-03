@@ -1,6 +1,6 @@
 # SETTING
 SCREEN_SIZE = (600, 600)
-SCREEN_TITLE = "Joints. Just wait and the L will tip over"
+SCREEN_TITLE = "Brick-Out"
 
 # COLOR
 AQUA = (0, 255, 255)
@@ -26,3 +26,9 @@ FPS = 60
 STEP = 1 / FPS
 GRAVYTY = (0.0, 900.0)
 DEBUG = True
+
+
+# SETTING BRICK-OUT
+COLLISION_TYPE = {"ball": 1, "brick": 2, "bottom": 3, "player": 4}
+PLAYER_IMG = "assets\\paddleBlu.png"
+PLYAER_SIZE = (104, 24)

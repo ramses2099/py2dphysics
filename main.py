@@ -3,90 +3,15 @@ import pygame as pg
 import pymunk as pmu
 import pymunk.pygame_util as pmuutil
 from setting import *
+from brickout import BrickOut
+
 
 # !  make the simulation the same each time, easier to debug
 random.seed(1)
 
 
-# ! draw manually
-def draw_ball(screen: pg.Surface, ball: pmu.Shape) -> None:
-    p = int(ball.body.position.x), int(ball.body.position.y)
-    pg.draw.circle(screen, RED, p, int(ball.radius), 2)
-
-
-# ! add falling ball to space
-def add_ball(space):
-    mass = 3
-    raidus = 25
-    # rigid body
-    body = pmu.Body()
-    x = random.randint(120, 300)
-    body.position = x, 50
-    # ?Base class for all the shapes.
-    # ? You usually dont want to create instances of this class directly
-    # ? but use one of the specialized shapes instead (Circle, Poly or Segment).
-    shape = pmu.Circle(body, raidus)
-    shape.mass = mass
-    shape.friction = 1
-    space.add(body, shape)
-    return shape
-
-
-# ! add static body
-def add_static_L(space):
-    body = pmu.Body(body_type=pmu.Body.STATIC)
-    body.position = (300, 300)
-    l1 = pmu.Segment(body, (-150, 0), (255, 0), 5)
-    l2 = pmu.Segment(body, (-150, 0), (-150, -50), 5)
-    l1.friction = 1
-    l2.friction = 2
-    space.add(body, l1, l2)
-    return l1, l2
-
-
-# ! Small helper to convert pymunk vec2d to pygame integers
-def to_pygame(p):
-    return round(p.x), round(p.y)
-
-
-# ! draw lines
-def draw_lines(screen, lines):
-    for line in lines:
-        body = line
-        pv1 = body.position + line.a.rotated(body.angle)
-        pv2 = body.position + line.b.rotated(body.angle)
-        p1 = to_pygame(pv1)
-        p2 = to_pygame(pv2)
-        pg.draw.line(screen, GREEN, False, [p1, p2])
-
-
-# ! Joints
-def add_L(space):
-    rotation_center_body = pmu.Body(body_type=pmu.Body.STATIC)
-    rotation_center_body.position = (300, 300)
-
-    rotation_limit_body = pmu.Body(body_type=pmu.Body.STATIC)
-    rotation_limit_body.position = (200, 300)
-
-    body = pmu.Body()
-    body.position = (300, 300)
-    l1 = pmu.Segment(body, (-150, 0), (255, 0), 5)
-    l2 = pmu.Segment(body, (-150, 0), (-150, -50), 5)
-    l1.friction = 1
-    l2.friction = 2
-    l1.mass = 8
-    l2.mass = 1
-
-    # add joint
-    rotation_center_joint = pmu.PinJoint(body, rotation_center_body, (0, 0), (0, 0))
-    joint_limit = 25
-
-    rotation_limit_joint = pmu.SlideJoint(
-        body, rotation_limit_body, (-100, 0), (0, 0), 0, joint_limit
-    )
-
-    space.add(l1, l2, body, rotation_center_joint, rotation_limit_joint)
-    return l1, l2
+def show_fps(screen, clock, font):
+    screen.blit(font.render(f"fps: {clock.get_fps()}", 1, WHITE), (10, 10))
 
 
 # ? main function
@@ -97,50 +22,44 @@ def main():
     pg.display.set_caption(SCREEN_TITLE)
     clock = pg.time.Clock()
 
+    # ? font setting
+    font = pg.font.SysFont("Arial", 16)
+
     # ? Spaces are the basic simulation unit in Chipmunk.
     # ? You add bodies, shapes and joints to a space, and then update the space as a whole.
     space = pmu.Space()
-    space.gravity = GRAVYTY
+    # setting for brick
 
-    # lines = add_static_L(space)
-    lines = add_L(space)
+    # pmuutil.positive_y_is_up = True
+    # space.gravity = GRAVYTY
+
+    # BRICK OUT INIT
+    brickout = BrickOut(space, screen)
 
     # ? debug option in pymunk
     if DEBUG:
         draw_option = pmuutil.DrawOptions(screen)
-    balls = []
-    balls_to_remove = []
 
-    # ball = add_ball(space)
-
-    ticks_to_next_ball = 10
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 sys.exit(0)
+            # Brick-out input
+            brickout.input(event)
 
         screen.fill(BLACK)
         if DEBUG:
             space.debug_draw(draw_option)
+            # show fps
+            show_fps(screen, clock, font)
 
         # update
-        ticks_to_next_ball -= 1
-        if ticks_to_next_ball <= 0:
-            thicks_to_next_ball = 25
-            ball_shape = add_ball(space)
-            balls.append(ball_shape)
+        # Brick-out update
+        brickout.update()
 
         # draw
-        # draw_ball(screen, ball)
-
-        for ball in balls:
-            if ball.body.position.y > 650:
-                balls_to_remove.append(ball)
-
-        if len(space.shapes) > 0:
-            for shape in space.shapes:
-                if shape.body.position.y > 650:
-                    space.remove(shape, shape.body)
+        # Brick-out draw
+        brickout.draw(screen)
 
         space.step(STEP)
 
