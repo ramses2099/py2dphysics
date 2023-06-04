@@ -1,6 +1,6 @@
 # SETTING
 SCREEN_SIZE = (600, 600)
-SCREEN_TITLE = "Brick-Out"
+SCREEN_TITLE = "Windows Test"
 
 # COLOR
 AQUA = (0, 255, 255)
