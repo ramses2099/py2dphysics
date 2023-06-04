@@ -32,3 +32,6 @@ DEBUG = True
 COLLISION_TYPE = {"ball": 1, "brick": 2, "bottom": 3, "player": 4}
 PLAYER_IMG = "assets\\paddleBlu.png"
 PLYAER_SIZE = (104, 24)
+BALL_IMG = "assets\\ballBlue.png"
+BALL_RADIUS = 15
+BALL_SIZE = (22, 22)
